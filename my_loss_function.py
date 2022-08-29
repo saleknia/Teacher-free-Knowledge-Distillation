@@ -2,6 +2,63 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def disparity(outputs, labels):
+    loss = 0.0
+    B,N = outputs.shape
+
+    mask_unique_value = torch.unique(labels)
+    unique_num = len(mask_unique_value)
+        
+    if unique_num<2:
+        return 0
+
+    prototypes = torch.zeros(size=(unique_num,N))
+
+    for count,p in enumerate(mask_unique_value):
+        p = p.long()
+        temp = 0.0
+        batch_counter = 0
+        for t in range(B):
+            if labels[t]==p:
+                v = outputs[t]
+                temp = temp + nn.functional.normalize(v, p=2.0, dim=0, eps=1e-12, out=None)
+                batch_counter = batch_counter + 1
+        temp = temp / batch_counter
+        prototypes[count] = temp
+
+
+        # indexs = [x.item()-1 for x in mask_unique_value]
+        # indexs.sort()
+
+        # l = 0.0
+        # proto = self.protos[k][indexs].unsqueeze(dim=0)
+        # prototypes = prototypes.unsqueeze(dim=0)
+        # distances_c = torch.cdist(proto.clone().detach(), prototypes, p=2.0)
+        # proto = self.protos[k][indexs].squeeze(dim=0)
+        # prototypes = prototypes.squeeze(dim=0)
+        # x = (torch.eye(distances_c[0].shape[0],distances_c[0].shape[1]))
+        # diagonal = distances_c[0] * x
+
+        # l = l + (1.0 / torch.mean((distances_c[0]-diagonal)))
+        # l = l + (1.0 * torch.mean((1.0-WP)*diagonal))
+
+        proto = prototypes.unsqueeze(dim=0)
+        distances = torch.cdist(proto, proto, p=2.0)
+        loss = loss + (1.0 / torch.mean(distances))
+
+    return loss
+
+def loss_kd_disparity(outputs, labels, params):
+    """
+    loss function for disparity regularization.
+    """
+    alpha = 0.01
+    loss_CE = F.cross_entropy(outputs, labels)
+    loss_disparity = disparity(outputs, labels)
+
+    KD_loss = loss_CE + (alpha * loss_disparity)
+
+    return KD_loss
 
 def loss_kd(outputs, labels, teacher_outputs, params):
     """

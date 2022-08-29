@@ -22,7 +22,7 @@ import model.shufflenetv2 as shufflenet
 import model.alexnet as alexnet
 import model.googlenet as googlenet
 import torchvision.models as models
-from my_loss_function import loss_label_smoothing, loss_kd_regularization, loss_kd, loss_kd_self
+from my_loss_function import loss_label_smoothing, loss_kd_regularization, loss_kd, loss_kd_self, loss_kd_disparity
 from train_kd import train_and_evaluate, train_and_evaluate_kd
 
 
@@ -33,6 +33,7 @@ parser.add_argument('--restore_file', default=None, help="Optional, name of the 
 parser.add_argument('--num_class', default=100, type=int, help="number of classes")
 parser.add_argument('-warm', type=int, default=1, help='warm up training phase')
 parser.add_argument('--regularization', action='store_true', default=False, help="flag for regulization")
+parser.add_argument('--disparity', action='store_true', default=False, help="flag for disparity")
 parser.add_argument('--label_smoothing', action='store_true', default=False, help="flag for label smoothing")
 parser.add_argument('--double_training', action='store_true', default=False, help="flag for double training")
 parser.add_argument('--self_training', action='store_true', default=False, help="flag for self training")
@@ -260,6 +261,9 @@ def main():
         elif args.label_smoothing:
             print(">>>>>>>>>>>>>>>>>>>>>>>>Label Smoothing>>>>>>>>>>>>>>>>>>>>>>>>")
             loss_fn = loss_label_smoothing
+        elif args.disparity:
+            print(">>>>>>>>>>>>>>>>>>>>>>>>Loss of Disparity>>>>>>>>>>>>>>>>>>>>>>>>")
+            loss_fn = loss_kd_disparity
         else:
             print(">>>>>>>>>>>>>>>>>>>>>>>>Normal Training>>>>>>>>>>>>>>>>>>>>>>>>")
             loss_fn = nn.CrossEntropyLoss()
