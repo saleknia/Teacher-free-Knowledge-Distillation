@@ -29,7 +29,7 @@ def loss_kd_disparity(outputs, labels, params):
     """
     loss function for disparity regularization.
     """
-    alpha = 0.01
+    alpha = 0.5
     loss_CE = F.cross_entropy(outputs, labels)
     loss_disparity = disparity(outputs, labels)
 

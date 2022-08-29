@@ -38,7 +38,7 @@ def evaluate(model, loss_fn, dataloader, params, args):
         data_batch, labels_batch = Variable(data_batch), Variable(labels_batch)
         # compute model output
         output_batch = model(data_batch)
-        if args.regularization:
+        if args.regularization or args.disparity:
             loss = loss_fn(output_batch, labels_batch, params)
         else:
             loss = loss_fn(output_batch, labels_batch)
