@@ -222,7 +222,7 @@ def train(model, optimizer, loss_fn, dataloader, params, epoch, warmup_scheduler
 
             optimizer.zero_grad()
             output_batch = model(train_batch)
-            if args.regularization:
+            if args.regularization or args.disparity:
                 loss = loss_fn(output_batch, labels_batch, params)
             else:
                 loss = loss_fn(output_batch, labels_batch)
